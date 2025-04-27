@@ -3,54 +3,49 @@
 
 services:
   # PHP Application Service
-  # This contains the PHP runtime with any extensions needed for Laravel
   app:
     build:
-      context: ./docker/php # Location of Dockerfile for PHP service
+      context: ./docker/php
     volumes:
-      - ./app:/var/www/html # Mount the application code into the container
+      - ./app:/var/www/html
     depends_on:
-      - db # Ensure database starts before the app
+      - db
     networks:
-      - app-network # Connect to the application network
+      - app-network
 
-  # Nginx Web Server
-  # Handles HTTP requests and forwards PHP requests to the app service
+  # Nginx Web Server with ModSecurity
   webserver:
-    image: nginx:latest # Using the official Nginx image
+    image: owasp/modsecurity-crs:nginx
     ports:
-      - "8000:80" # Map container port 80 to host port 8000
+      - "8000:80"
     volumes:
-      - ./app:/var/www/html # Mount application code
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf # Custom Nginx configuration
+      - ./app:/var/www/html
+      - ./docker/nginx/custom-laravel.conf:/etc/nginx/conf.d/custom-laravel.conf
     depends_on:
-      - app # Ensure PHP service starts before Nginx
+      - app
     networks:
       - app-network
 
   # MariaDB Database Service
-  # Stores the application data
   db:
-    image: mariadb:latest # Using the official MariaDB image
-    restart: always # Automatically restart the container if it stops
+    image: mariadb:latest
+    restart: always
     environment:
-      # Database configuration
-      MYSQL_ROOT_PASSWORD: rootpassword # Root password (consider using Docker secrets for production)
-      MYSQL_DATABASE: laravel # Database name for application
-      MYSQL_USER: laravel # Regular database user
-      MYSQL_PASSWORD: laravelpassword # User password
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravelpassword
     ports:
-      - "3307:3306" # Map container port 3306 to host port 3307
-        # NOTE: In Laravel's .env file, use DB_PORT=3306 (the internal port)
+      - "3330:3306"
     volumes:
-      - dbdata:/var/lib/mysql # Persist database data
+      - dbdata:/var/lib/mysql
     networks:
       - app-network
 
 # Named volumes for persistent data
 volumes:
-  dbdata: # Volume for database files to persist between container restarts
+  dbdata:
 
 # Custom networks
 networks:
-  app-network: # Network for all services to communicate with each other
+  app-network:
