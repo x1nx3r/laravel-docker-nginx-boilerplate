@@ -1,142 +1,118 @@
-# Laravel Docker Boilerplate
+# Laravel Docker Nginx Boilerplate
 
-A streamlined Docker environment for Laravel application development with Nginx, PHP, and MariaDB.
+A modern, production-ready boilerplate for Laravel applications with Docker, Nginx with ModSecurity, and MariaDB.
 
-## 📋 Overview
+## Overview
 
-This boilerplate provides a ready-to-use Docker environment for Laravel development with:
+This boilerplate provides a complete development environment for Laravel applications using Docker containers. It includes:
 
-- Nginx web server
-- PHP-FPM application server
-- MariaDB database
-- Pre-configured networking
-- Volume persistence
+- **PHP Application Container**: Configured specifically for Laravel
+- **Nginx Web Server**: With OWASP ModSecurity for enhanced security
+- **MariaDB Database**: Latest version with persistent storage
 
-## 🚀 Quick Start
+## Repository Structure
 
-### Prerequisites
+```
+laravel-docker-nginx-boilerplate/
+├── app/                     # Laravel application code
+├── docker/
+│   ├── nginx/
+│   │   └── custom-laravel.conf  # Nginx configuration for Laravel
+│   └── php/                 # PHP Dockerfile and configs
+├── docker-compose.yml       # Docker Compose configuration
+└── README.md                # This file
+```
 
-- Docker and Docker Compose installed on your system
-- Git (for cloning this repository)
+## Features
 
-### Setup Instructions
+- **Security-focused**: Uses OWASP ModSecurity to protect against common web vulnerabilities
+- **Development Ready**: Pre-configured for Laravel development
+- **Production Capable**: Structured for easy deployment to production environments
+- **Persistent Data**: Database data persists between container restarts
+- **Isolated Network**: All services run on an isolated Docker network
 
-1. **Clone this repository**
+## Requirements
+
+- Docker Engine
+- Docker Compose
+- Git (for cloning the repository)
+
+## Quick Start
+
+1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/laravel-docker-app.git
-   cd laravel-docker-app
+   git clone https://github.com/yourusername/laravel-docker-nginx-boilerplate.git
+   cd laravel-docker-nginx-boilerplate
    ```
 
-2. **Create a new Laravel project in the app directory**
-   ```bash
-   composer create-project laravel/laravel app
-   ```
-
-3. **Configure Laravel's database connection**
-
-   Edit `app/.env` file with these settings:
-   ```
-   DB_CONNECTION=mysql
-   DB_HOST=db
-   DB_PORT=3306
-   DB_DATABASE=laravel
-   DB_USERNAME=laravel
-   DB_PASSWORD=laravelpassword
-   ```
-
-4. **Start the Docker environment**
+2. **Start the environment**
    ```bash
    docker-compose up -d
    ```
 
+3. **Install Laravel (if starting a new project)**
+   ```bash
+   docker-compose exec app composer create-project laravel/laravel .
+   ```
+
+4. **Set permissions**
+   ```bash
+   docker-compose exec app chown -R www-data:www-data /var/www/html/storage
+   docker-compose exec app chmod -R 775 /var/www/html/storage
+   ```
+
 5. **Access your application**
-   - Website: http://localhost:8000
-   - Database: localhost:3307 (username: laravel, password: laravelpassword)
+   - Web: http://localhost:8000
+   - Database: localhost:3330 (Host), laravel (DB), laravel (User), laravelpassword (Password)
 
-## 🏗️ Project Structure
+## Configuration
 
-```
-laravel-docker-app/
-├── app/                    # Laravel application (created during setup)
-├── docker/
-│   ├── nginx/              # Nginx configuration
-│   │   └── default.conf    # Server block configuration
-│   └── php/                # PHP configuration and Dockerfile
-├── docker-compose.yml      # Docker services configuration
-└── README.md               # This file
-```
+### Environment Variables
 
-## ⚙️ Configuration Details
+Database configuration (defined in docker-compose.yml):
+- **MYSQL_ROOT_PASSWORD**: rootpassword
+- **MYSQL_DATABASE**: laravel
+- **MYSQL_USER**: laravel
+- **MYSQL_PASSWORD**: laravelpassword
 
-### Web Server (Nginx)
-- External Port: 8000
-- Configuration File: `docker/nginx/default.conf`
+### Ports
 
-### PHP Application
-- Built from Dockerfile in `docker/php/`
-- Laravel app mounted at `/var/www/html`
+- **Web Server**: 8000 (host) → 80 (container)
+- **Database**: 3330 (host) → 3306 (container)
 
-### Database (MariaDB)
-- External Port: 3307
-- Internal Port: 3306
-- Root Password: rootpassword
-- Database: laravel
-- User: laravel
-- Password: laravelpassword
-- Persistent Storage: Docker volume `dbdata`
+### Customizing
 
-## 🧰 Common Tasks
+- **Nginx Configuration**: Modify `docker/nginx/custom-laravel.conf`
+- **PHP Configuration**: Update Dockerfile and configs in `docker/php/`
+- **Docker Compose**: Adjust services in `docker-compose.yml`
 
-### Running Artisan Commands
-```bash
-docker-compose exec app php artisan <command>
-```
+## Security Considerations
 
-### Accessing the Database CLI
-```bash
-docker-compose exec db mysql -u laravel -p
-```
+- This boilerplate includes OWASP ModSecurity for web application firewall capabilities
+- Change all default passwords before deploying to production
+- Consider using Docker secrets for sensitive information in production
+- Review and customize ModSecurity rules for your specific application needs
 
-### Installing PHP Dependencies
-```bash
-docker-compose exec app composer install
+## Development Workflow
 
-## 🔍 Troubleshooting
+1. Place your Laravel application code in the `app/` directory
+2. The changes will be immediately reflected due to volume mounting
+3. Run Laravel commands using `docker-compose exec app [command]`
 
-### Database Connection Issues
-- Ensure DB_HOST is set to `db` in your `.env` file
-- Make sure to use port 3306 (internal container port) in your Laravel config
-- Check if the database service is running: `docker-compose ps`
+## Production Deployment
 
-### Permission Problems
-If you encounter permission issues:
-```bash
-docker-compose exec app chown -R www-data:www-data /var/www/html/storage
-```
+For production deployment:
 
-### Container Access
-To access a container's shell:
-```bash
-docker-compose exec app bash
-docker-compose exec db bash
-docker-compose exec webserver sh
-```
+1. Modify environment variables for production settings
+2. Use Docker Swarm or Kubernetes for orchestration
+3. Set up proper TLS/SSL termination
+4. Enable database backups
+5. Configure proper logging and monitoring
 
-## 🛠️ Customization
+## Contributing
 
-### Adding PHP Extensions
-Modify `docker/php/Dockerfile` to install additional PHP extensions.
+Contributions to improve this boilerplate are welcome. Please feel free to submit a Pull Request.
 
-### Changing Database Settings
-Modify the environment variables in the `docker-compose.yml` file.
-
-### Modifying Nginx Configuration
-Edit `docker/nginx/default.conf` and rebuild the containers.
-
-## 📄 License
+## License
 
 This boilerplate is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
----
-
-*For contributions, issues, or feature requests, please submit them to the GitHub repository.*
