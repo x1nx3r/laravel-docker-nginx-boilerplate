@@ -4,3 +4,5 @@ app/*
 
 # But keep the directory itself by not ignoring .gitkeep
 !app/.gitkeep
+
+.config.ym

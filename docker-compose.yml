@@ -17,7 +17,7 @@ services:
   webserver:
     image: owasp/modsecurity-crs:nginx
     ports:
-      - "8000:80"
+      - "64420:80"
     volumes:
       - ./app:/var/www/html
       - ./docker/nginx/custom-laravel.conf:/etc/nginx/conf.d/custom-laravel.conf
